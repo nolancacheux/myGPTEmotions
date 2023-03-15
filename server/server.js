@@ -1,5 +1,3 @@
-
-// with text davinci 003 : 
 "use strict";
 
 import express from "express";
@@ -29,25 +27,20 @@ app.get("/", async (req, res) => {
 app.post("/", async (req, res) => {
   try {
     const prompt = req.body.prompt;
-    const response = await openai.createCompletion({
-      model: "text-davinci-003",
-      prompt: `${prompt}`,
-      temperature: 0.2,
-      max_tokens: 3000,
-      top_p: 1,
-      frequency_penalty: 0.5,
-      presence_penalty: 0,
+    const response = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: [{role: "user", content: `${prompt}`}], 
     });
 
     res.status(200).send({
-      message: response.data.choices[0].text,
+      message: response.data.choices[0].message.content,
     });
   } catch (error) {
     console.log(error);
-    res.status(500).send("Erreur");
+    res.status(500).send({ error });
   }
 });
 
 app.listen(5000, () =>
-  console.log("Server running on port http://localhost:6000")
+  console.log("Server running on port http://localhost:5000")
 );

@@ -30,11 +30,13 @@ const humanConfig = { // user configuration for human, used to fine-tune behavio
 };
 
 const human = new Human(humanConfig); // new instance of human
-
-export const showLoader = (msg) => { loader.setAttribute('msg', msg); loader.style.display = 'block'; };
+export const showLoader = (msg) => { 
+  loader.setAttribute('msg', msg); 
+  loader.style.display = 'flex'; 
+};
 export const hideLoader = () => loader.style.display = 'none';
 
-class ComponentLoader extends HTMLElement { // watch for attributes
+class ComponentLoader extends HTMLElement {
   message = document.createElement('div');
 
   static get observedAttributes() { return ['msg']; }
@@ -43,16 +45,13 @@ class ComponentLoader extends HTMLElement { // watch for attributes
     this.message.innerHTML = currVal;
   }
 
-  connectedCallback() { // triggered on insert
+  connectedCallback() {
     this.attachShadow({ mode: 'open' });
     const css = document.createElement('style');
     css.innerHTML = `
-      .loader-container { top: 450px; justify-content: center; position: fixed; width: 100%; }
-      .loader-message { font-size: 1.5rem; padding: 1rem; }
-      .loader { width: 300px; height: 300px; border: 3px solid transparent; border-radius: 50%; border-top: 4px solid #f15e41; animation: spin 4s linear infinite; position: relative; }
-      .loader::before, .loader::after { content: ""; position: absolute; top: 6px; bottom: 6px; left: 6px; right: 6px; border-radius: 50%; border: 4px solid transparent; }
-      .loader::before { border-top-color: #bad375; animation: 3s spin linear infinite; }
-      .loader::after { border-top-color: #26a9e0; animation: spin 1.5s linear infinite; }
+      .loader-container { display: flex; transition: opacity 2s ease-in-out;justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9); z-index: 9999; }
+      .loader-message { font-size: 1.5rem; color: white; padding: 1rem; }
+      .loader { width: 50px; height: 50px; border-radius: 50%; border: 5px solid #f1c40f; border-top: 5px solid white; animation: spin 1s linear infinite; position: relative; }
       @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     `;
     const container = document.createElement('div');
@@ -64,14 +63,20 @@ class ComponentLoader extends HTMLElement { // watch for attributes
     this.message.id = 'loader-message';
     this.message.className = 'loader-message';
     this.message.innerHTML = '';
-    container.appendChild(this.message);
     container.appendChild(loader);
+    container.appendChild(this.message);
     this.shadowRoot?.append(css, container);
-    loader = this; // eslint-disable-line @typescript-eslint/no-this-alias
+    loader = this;
+    
+    // Add event listener to hide the loader on load
+    window.addEventListener('load', () => {
+      hideLoader();
+    });
   }
 }
 
 customElements.define('component-loader', ComponentLoader);
+
 
 
 function addFace(face, source) {
@@ -176,12 +181,12 @@ const gaze = `Direction ${deg(face.rotation?.gaze.bearing)}° Force ${Math.round
 let currentImage;
 
 async function addFaces(imgEl) {
-  showLoader('human: busy');
+  showLoader('Détection de vos émotions en cours.');
   const faceEl = document.getElementById('faces');
   faceEl.innerHTML = '';
   const res = await human.detect(imgEl);
   console.log(res); // eslint-disable-line no-console
-  document.getElementById('informations').innerHTML = `detected ${res.face.length} faces`;
+  document.getElementById('informations').innerHTML = `Nous avons détecté ${res.face.length} visages`;
   for (const face of res.face) {
     const canvas = addFace(face, imgEl.src.substring(0, 64));
     faceEl.appendChild(canvas);
@@ -345,15 +350,14 @@ function uploadCaptureImage() {
 
 async function main() {
 
-  showLoader('loading models');
+  showLoader('Veuillez patienter un instant.');
   await human.load();
-  showLoader('compiling models');
+  showLoader("Chargement de l'IA terminé.");
   await human.warmup();
   //   showLoader('loading images');
   //   const images = ['group-1.jpg', 'group-2.jpg', 'group-3.jpg', 'group-4.jpg', 'group-5.jpg', 'group-6.jpg', 'group-7.jpg', 'solvay1927.jpg', 'stock-group-1.jpg', 'stock-group-2.jpg'];
   //   const imageUris = images.map((a) => `./samples/in/${a}`);
   //   for (let i = 0; i < imageUris.length; i++) addImage(imageUris[i]);
-
   hideLoader();
   uploadImage();
   uploadCaptureImage();
@@ -384,10 +388,6 @@ window.onload = main;
 
 "use strict";
 
-// importing assets
-import bot from "./assets/svg/bot.svg";
-import user from "./assets/svg/user.svg";
-
 const form = document.querySelector("form"); // only form in the page so no need to specify
 const chatContainer = document.querySelector("#chat_container");
 
@@ -395,12 +395,12 @@ const chatContainer = document.querySelector("#chat_container");
 let loading;
 
 const loader2 = el => {
-  el.textContent = "";
+  el.textContent = "En train d'écrire";
 
   loading = setInterval(() => {
     el.textContent += ".";
 
-    el.textContent === "...." ? (el.textContent = "") : el.textContent;
+    el.textContent === "En train d'écrire...." ? (el.textContent = "En train d'écrire") : el.textContent;
   }, 300);
 };
 
@@ -426,11 +426,7 @@ const generateMsgId = () => {
 // Shows a colored message depending on the sender
 const chatStripe = (isBot, value, uniqueId) => {
   return `
-      <div class="wrapper ${isBot && "bot"}" >
-        <div class="chat">
-          <div class="chat__profile">
-            <img src="${isBot ? bot : user}" alt="${isBot ? "bot" : "user"}" />
-          </div>
+      <div class="wrapper" >
           <div class="chat__message" id="${uniqueId}">
             ${value}
           </div>
