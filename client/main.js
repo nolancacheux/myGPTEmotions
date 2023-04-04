@@ -49,10 +49,44 @@ class ComponentLoader extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     const css = document.createElement('style');
     css.innerHTML = `
-      .loader-container { display: flex; transition: opacity 2s ease-in-out;justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9); z-index: 9999; }
-      .loader-message { font-size: 1.5rem; color: white; padding: 1rem; }
-      .loader { width: 50px; height: 50px; border-radius: 50%; border: 5px solid #f1c40f; border-top: 5px solid white; animation: spin 1s linear infinite; position: relative; }
-      @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .loader-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #1f003d;
+      z-index: 9999;
+    }
+    
+    .loader-message {
+      font-size: 1.5rem;
+      color: white;
+      padding: 1rem;
+    }
+    
+    .loader {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 5px solid #f1c40f;
+      border-top: 5px solid white;
+      animation: spin 1s linear infinite;
+      position: relative;
+    }
+    
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    
     `;
     const container = document.createElement('div');
     container.id = 'loader-container';
@@ -175,11 +209,9 @@ const gaze = `Direction ${deg(face.rotation?.gaze.bearing)}° Force ${Math.round
     human.tf.dispose(face.tensor);
     return canvas;
   }
-  
-  
 
+  
 let currentImage;
-
 async function addFaces(imgEl) {
   showLoader('Détection de vos émotions en cours.');
   const faceEl = document.getElementById('faces');
@@ -194,20 +226,6 @@ async function addFaces(imgEl) {
   }
   currentImage = imgEl;
   hideLoader();
-}
-
-
-
-function showLoader2(text) {
-  const loaderEl = document.getElementById('loader');
-  loaderEl.innerHTML = `${text} <span class="loader"></span>`;
-  loaderEl.style.display = 'block';
-}
-
-function hideLoader2() {
-  const loaderEl = document.getElementById('loader');
-  loaderEl.innerHTML = '';
-  loaderEl.style.display = 'none';
 }
 
 // function addImage(imageUri) {
@@ -257,7 +275,6 @@ function uploadImage() {
     reader.readAsDataURL(file);
   });
 }
-
 var width = 320; // We will scale the photo width to this
 var height = 0; // This will be computed based on the input stream
 
@@ -267,41 +284,53 @@ var video = null;
 var canvas = null;
 var photo = null;
 var startbutton = null;
+var camera_button = null;
 
 function startup() {
   console.log("Startup function");
   video = document.getElementById('video');
+  
   canvas = document.getElementById('canvas');
   photo = document.getElementById('photo');
   startbutton = document.getElementById('startbutton');
+  camera_button = document.getElementById('start-camera');
 
-  navigator.mediaDevices.getUserMedia({
-    video: true,
-    audio: false
-  })
-    .then(function (stream) {
-      video.srcObject = stream;
-      video.play();
-    })
-    .catch(function (err) {
-      console.log("An error occurred: " + err);
-    });
+  video.style.display = 'none';
+  photo.style.display = 'none';
+  startbutton.style.display = 'none';
 
-  video.addEventListener('canplay', function (ev) {
-    if (!streaming) {
-      height = video.videoHeight / (video.videoWidth / width);
-
-      if (isNaN(height)) {
-        height = width / (4 / 3);
-      }
-
-      video.setAttribute('width', width);
-      video.setAttribute('height', height);
-      canvas.setAttribute('width', width);
-      canvas.setAttribute('height', height);
-      streaming = true;
+  camera_button.addEventListener('click', async function() {
+    try {
+      var stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
     }
-  }, false);
+    catch(error) {
+      alert(error.message);
+      return;
+    }
+
+    video.srcObject = stream;
+    video.play();
+    camera_button.style.display = 'none';
+    video.style.display = 'block';
+    photo.style.display = 'block';
+    startbutton.style.display = 'block';
+
+    video.addEventListener('canplay', function (ev) {
+      if (!streaming) {
+        height = video.videoHeight / (video.videoWidth / width);
+
+        if (isNaN(height)) {
+          height = width / (4 / 3);
+        }
+
+        video.setAttribute('width', width);
+        video.setAttribute('height', height);
+        canvas.setAttribute('width', width);
+        canvas.setAttribute('height', height);
+        streaming = true;
+      }
+    }, false);
+  });
 
   startbutton.addEventListener('click', function (ev) {
     takepicture();
@@ -310,7 +339,6 @@ function startup() {
 
   clearphoto();
 }
-
 
 function clearphoto() {
   console.log("clear function");
@@ -363,6 +391,7 @@ async function main() {
   uploadCaptureImage();
 
 }
+
 window.addEventListener('load', startup, false);
 window.onload = main;
 

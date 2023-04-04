@@ -1,81 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>IAEmotions</title>
-    <!-- <meta http-equiv="content-type" content="text/html; charset=utf-8"> -->
-    <meta name="viewport" content="width=device-width, shrink-to-fit=yes">
-    <link rel="icon" type="image/svg+xml" href="/favicon.png" />
-    <meta name="keywords" content="Human">
-    <meta name="application-name" content="Human">
-    <meta name="description" content="Human: 3D Face Detection, Body Pose, Hand & Finger Tracking, Iris Tracking, Age & Gender Prediction, Emotion Prediction & Gesture Recognition; Author: Vladimir Mandic <https://github.com/vladmandic>">
-    <meta name="msapplication-tooltip" content="Human: 3D Face Detection, Body Pose, Hand & Finger Tracking, Iris Tracking, Age & Gender Prediction, Emotion Prediction & Gesture Recognition; Author: Vladimir Mandic <https://github.com/vladmandic>">
-    <meta name="theme-color" content="#000000">
-    <!--<script src="facedetect.js" type="module"></script> -->
-    <link rel="stylesheet" type="text/css" href="style.css">
-  </head>
-  <body>
-    <component-loader></component-loader>
-    <!-- ajout du titre centré -->
+
+<head>
+  <meta charset="utf-8">
+  <title>IAEmotions</title>
+  <!-- <meta http-equiv="content-type" content="text/html; charset=utf-8"> -->
+  <meta name="viewport" content="width=device-width, shrink-to-fit=yes">
+  <link rel="icon" type="image/svg+xml" href="/favicon.png" />
+  <meta name="keywords" content="Human">
+  <meta name="application-name" content="Human">
+  <meta name="description"
+    content="Human: 3D Face Detection, Body Pose, Hand & Finger Tracking, Iris Tracking, Age & Gender Prediction, Emotion Prediction & Gesture Recognition; Author: Vladimir Mandic <https://github.com/vladmandic>">
+  <meta name="msapplication-tooltip"
+    content="Human: 3D Face Detection, Body Pose, Hand & Finger Tracking, Iris Tracking, Age & Gender Prediction, Emotion Prediction & Gesture Recognition; Author: Vladimir Mandic <https://github.com/vladmandic>">
+  <meta name="theme-color" content="#000000">
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+  <div id="preloader">
+    <div id="loader" class="loader"></div>
+  </div>
+  <component-loader></component-loader>
   <div style="display:flex; justify-content:center; align-items:center;">
     <h3>IAEmotions</h3>
   </div>
-    <div style="display: flex">
+  <div class="container">
+    <div class='bloc1' style="display: flex;">
       <div>
-        <h1>Option 1: Télécharge une image pour avoir ton horoscope</h1>
-        <div id="images" style="display: flex; width: 98vw; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth"></div>
+        <h1>Télécharge une photo !</h1>
+        <div id="images"
+          style="display: flex; width: 98vw; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth"></div>
         <input type="file" id="inputImage">
+        <h1>
+          OU
+        </h1>
         <div class="contentarea">
-            <h1>
-                Option 2 : Prend un selfie pour avoir ton horoscope
-            </h1>
-            <div class="camera">
-                <video id="video">Accès indisponible.</video>
-            </div>
-            <div><button id="startbutton">Prendre la photo</button></div>
-            <canvas id="canvas"></canvas>
-            <div class="output">
-                <img id="photo">
-                <div id="result"></div>
-              </div>
-              
+          <h1>
+            Prend un selfie !
+          </h1>
+          <div class="camera">
+            <video id="video">Accès indisponible.</video>
+          </div>
+          <button id="start-camera">Utiliser la caméra</button>
+
+          <button id="startbutton">Prendre la photo</button>
+          <canvas id="canvas"></canvas>
+          <div class="output">
+            <img id="photo">
+            <div id="result"></div>
+          </div>
+
         </div>
+      </div>
     </div>
-    </div>
-    
-    <div id="list" style="height: 10px"></div>
-    <h1>Survolez ou cliquez sur le visage pour afficher les détails.</h1>
-    <div id="faces" style="overflow-y: auto"></div>
-    <div id="informations" style="white-space: pre;"></div>
-    <div id="prompt" style="white-space: pre;" ></div>
-    <div id="list" style="height: 10px"></div>
-    </div>
-    
-    <div id="preloader">
-      <div id="loader" class="loader"></div>
-    </div>
-    
 
-      
+    <div class='bloc2'>
+      <div id="list" style="height: 10px"></div>
+      <h1>Survolez ou Cliquez sur votre visage</h1>
+      <div id="faces" style="overflow-y: auto"></div>
+      <div id="informations" style="white-space: pre;"></div>
+      <div id="prompt" style="white-space: pre;"></div>
+      <div id="list" style="height: 10px"></div>
+    </div>
+
+
     <div id="app">
-      
-  <div class="wrap">
-    <h2>Statistiques émotionnelles : </h2>
-    <div class="holder"><div class="bar " data-percent="0%"><span class="label">Happiness</span></div>
-    <div class="bar" data-percent="0%"><span class="label second">Neutral</span></div>
-    <div class="bar" data-percent="0%"><span class="label">Sadness</span></div>
-    <div class="bar" data-percent="0%"><span class="label second">Anger</span></div>
-    <div class="bar" data-percent="0%"><span class="label">Disgust</span></div>
-    <div class="bar" data-percent="0%"><span class="label second">Surprise</span></div>
-    <div class="bar" data-percent="0%"><span class="label ">Fear</span></div>
+      <div class='bloc3'>
+        <div class="wrap">
+          <h2>Statistiques émotionnelles : </h2>
+          <div class="holder">
+            <div class="bar " data-percent="0%"><span class="label">Happiness</span></div>
+            <div class="bar" data-percent="0%"><span class="label second">Neutral</span></div>
+            <div class="bar" data-percent="0%"><span class="label">Sadness</span></div>
+            <div class="bar" data-percent="0%"><span class="label second">Anger</span></div>
+            <div class="bar" data-percent="0%"><span class="label">Disgust</span></div>
+            <div class="bar" data-percent="0%"><span class="label second">Surprise</span></div>
+            <div class="bar" data-percent="0%"><span class="label ">Fear</span></div>
+          </div>
+          <div id="chat_container"></div>
+          <form action="">
+          </form>
+        </div>
+      </div>
     </div>
-    <div id="chat_container"></div>
-      <form action="">
-      </form>
-    
-
- <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <ul class="backgroundd">
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+    </ul>
+    <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script type="module" src="/main.js"></script>
 
 </html>
