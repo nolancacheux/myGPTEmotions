@@ -11,7 +11,7 @@ let loader;
 
 const humanConfig = { // user configuration for human, used to fine-tune behavior
   debug: true,
-  modelBasePath: '../models/',
+  modelBasePath: 'https://vladmandic.github.io/human-models/models/',
   filter: { enabled: true, equalization: false, flip: false },
   face: {
     enabled: true,

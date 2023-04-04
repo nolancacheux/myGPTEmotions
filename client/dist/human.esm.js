@@ -1802,7 +1802,7 @@ var C3 = Kt((wg, aI) => {
           return ly(Dr, sp), sp;
         } };
         function fe(Dr) {
-          return B === "string" ? Re(Dr) : B === "boolean" ? Boolean(Dr) : Dr;
+          return B === "string" ? Re(Dr) : B === "boolean" ? !!Dr : Dr;
         }
         var ve = cm(F), Ft = [], Qr = 0;
         if (_e)
@@ -2470,7 +2470,7 @@ var I3 = Kt((Ig, uI) => {
           return qi(hr, Za), Za;
         } };
         function qe(hr) {
-          return se === "string" ? K(hr) : se === "boolean" ? Boolean(hr) : hr;
+          return se === "string" ? K(hr) : se === "boolean" ? !!hr : hr;
         }
         var Ue = Jl(G), Wt = [], Yr = 0;
         if (nt)
@@ -14600,7 +14600,7 @@ function k5(r) {
   let { inputs: e, backend: t10, attrs: o } = r, { sparseIndices: n, sparseValues: s, defaultValue: a } = e, { outputShape: i } = o, { sliceRank: p, numUpdates: u, sliceSize: c, strides: l, outputSize: m } = S.calculateShapes(s, n, i), d = false, f = t10.bufferSync(n), h;
   switch (s.dtype) {
     case "bool": {
-      let g = t10.bufferSync(s), x = Boolean(t10.data.get(a.dataId).values[0]);
+      let g = t10.bufferSync(s), x = !!t10.data.get(a.dataId).values[0];
       h = Va(f, g, i, m, c, u, p, l, x, d);
       break;
     }
@@ -32856,7 +32856,7 @@ async function loadModel(modelPath) {
 }
 
 // package.json
-var version = "3.0.5";
+var version = "3.0.6";
 
 // src/tfjs/humangl.ts
 var config2 = {
@@ -33047,7 +33047,7 @@ function registerCustomOps(config3) {
 }
 var defaultFlags = {};
 async function check(instance, force = false) {
-  var _a2;
+  var _a2, _b2;
   instance.state = "backend";
   if (((_a2 = instance.config.backend) == null ? void 0 : _a2.length) === 0)
     instance.config.backend = await getBestBackend();
@@ -33058,12 +33058,23 @@ async function check(instance, force = false) {
         if (instance.config.debug)
           log("running inside web worker");
       }
-      if (env.browser && instance.config.backend === "tensorflow") {
+      if (typeof navigator !== "undefined" && ((_b2 = navigator == null ? void 0 : navigator.userAgent) == null ? void 0 : _b2.toLowerCase().includes("electron"))) {
+        if (instance.config.debug)
+          log("running inside electron");
+      }
+      let available = Object.keys(sr().registryFactory);
+      if (instance.config.backend === "humangl" && !available.includes("humangl")) {
+        register(instance);
+        available = Object.keys(sr().registryFactory);
+      }
+      if (instance.config.debug)
+        log("available backends:", available);
+      if (env.browser && !env.node && instance.config.backend === "tensorflow" && available.includes("webgl")) {
         if (instance.config.debug)
           log("override: backend set to tensorflow while running in browser");
         instance.config.backend = "webgl";
       }
-      if (env.node && (instance.config.backend === "webgl" || instance.config.backend === "humangl")) {
+      if (env.node && !env.browser && (instance.config.backend === "webgl" || instance.config.backend === "humangl") && available.includes("tensorflow")) {
         if (instance.config.debug)
           log(`override: backend set to ${instance.config.backend} while running in nodejs`);
         instance.config.backend = "tensorflow";
@@ -33085,13 +33096,6 @@ async function check(instance, force = false) {
           }
         }
       }
-      let available = Object.keys(sr().registryFactory);
-      if (instance.config.backend === "humangl" && !available.includes("humangl")) {
-        register(instance);
-        available = Object.keys(sr().registryFactory);
-      }
-      if (instance.config.debug)
-        log("available backends:", available);
       if (!available.includes(instance.config.backend)) {
         log(`error: backend ${instance.config.backend} not found in registry`);
         instance.config.backend = env.node ? "tensorflow" : "webgl";
@@ -37146,6 +37150,7 @@ function drawLabels(f, ctx) {
   if (!localOptions.drawLabels || ((_a2 = localOptions.faceLabels) == null ? void 0 : _a2.length) === 0)
     return;
   let l = localOptions.faceLabels.slice();
+  l = replace(l, "[id]", f.id.toFixed(0));
   if (f.score)
     l = replace(l, "[score]", 100 * f.score);
   if (f.gender)
@@ -37326,6 +37331,7 @@ function body(inCanvas2, result, drawOptions) {
       rect(ctx, result[i].box[0], result[i].box[1], result[i].box[2], result[i].box[3], localOptions2);
       if (localOptions2.drawLabels && ((_a2 = localOptions2.bodyLabels) == null ? void 0 : _a2.length) > 0) {
         let l = localOptions2.bodyLabels.slice();
+        l = replace(l, "[id]", result[i].id.toFixed(0));
         l = replace(l, "[score]", 100 * result[i].score);
         labels(ctx, l, result[i].box[0], result[i].box[1], localOptions2);
       }
@@ -37376,6 +37382,7 @@ function hand(inCanvas2, result, drawOptions) {
       rect(ctx, h.box[0], h.box[1], h.box[2], h.box[3], localOptions2);
       if (localOptions2.drawLabels && ((_a2 = localOptions2.handLabels) == null ? void 0 : _a2.length) > 0) {
         let l = localOptions2.handLabels.slice();
+        l = replace(l, "[id]", h.id.toFixed(0));
         l = replace(l, "[label]", h.label);
         l = replace(l, "[score]", 100 * h.score);
         labels(ctx, l, h.box[0], h.box[1], localOptions2);
@@ -37438,6 +37445,7 @@ function object(inCanvas2, result, drawOptions) {
       rect(ctx, h.box[0], h.box[1], h.box[2], h.box[3], localOptions2);
       if (localOptions2.drawLabels && ((_a2 = localOptions2.objectLabels) == null ? void 0 : _a2.length) > 0) {
         let l = localOptions2.objectLabels.slice();
+        l = replace(l, "[id]", h.id.toFixed(0));
         l = replace(l, "[label]", h.label);
         l = replace(l, "[score]", 100 * h.score);
         labels(ctx, l, h.box[0], h.box[1], localOptions2);
@@ -38911,13 +38919,13 @@ async function predict5(image, config3, idx, count2) {
   }
   skipped4 = 0;
   return new Promise(async (resolve) => {
-    var _a3;
+    var _a3, _b3, _c2;
     const obj = [];
     if ((_a3 = config3.face.emotion) == null ? void 0 : _a3.enabled) {
       const t10 = {};
       const inputSize10 = (model8 == null ? void 0 : model8.inputs[0].shape) ? model8.inputs[0].shape[2] : 0;
-      if (config3.face.emotion["crop"] > 0) {
-        const crop = config3.face.emotion["crop"];
+      if (((_b3 = config3.face.emotion) == null ? void 0 : _b3["crop"]) > 0) {
+        const crop = (_c2 = config3.face.emotion) == null ? void 0 : _c2["crop"];
         const box = [[crop, crop, 1 - crop, 1 - crop]];
         t10.resize = eK.cropAndResize(image, box, [0], [inputSize10, inputSize10]);
       } else {
@@ -38965,11 +38973,19 @@ async function load7(config3) {
     log("cached model:", model9["modelUrl"]);
   return model9;
 }
-function enhance(input) {
+function enhance(input, config3) {
+  var _a2, _b2;
   const tensor = input.image || input.tensor || input;
   if (!(model9 == null ? void 0 : model9.inputs[0].shape))
     return tensor;
-  const crop = eK.resizeBilinear(tensor, [model9.inputs[0].shape[2], model9.inputs[0].shape[1]], false);
+  let crop;
+  if (((_a2 = config3.face.description) == null ? void 0 : _a2["crop"]) > 0) {
+    const cropval = (_b2 = config3.face.description) == null ? void 0 : _b2["crop"];
+    const box = [[cropval, cropval, 1 - cropval, 1 - cropval]];
+    crop = eK.cropAndResize(tensor, box, [0], [model9.inputs[0].shape[2], model9.inputs[0].shape[1]]);
+  } else {
+    crop = eK.resizeBilinear(tensor, [model9.inputs[0].shape[2], model9.inputs[0].shape[1]], false);
+  }
   const norm = ne(crop, constants.tf255);
   Ot(crop);
   return norm;
@@ -38994,7 +39010,7 @@ async function predict6(image, config3, idx, count2) {
   return new Promise(async (resolve) => {
     var _a3;
     if ((_a3 = config3.face.description) == null ? void 0 : _a3.enabled) {
-      const enhanced = enhance(image);
+      const enhanced = enhance(image, config3);
       const resT = model9 == null ? void 0 : model9.execute(enhanced);
       lastTime5 = now();
       Ot(enhanced);
@@ -39171,21 +39187,25 @@ async function predict9(image, config3, idx, count2) {
   }
   skipped8 = 0;
   return new Promise(async (resolve) => {
-    var _a3, _b3;
+    var _a3, _b3, _c2, _d2;
     if (!(model12 == null ? void 0 : model12.inputs[0].shape))
       return;
     const t10 = {};
-    const box = [[0, 0.1, 0.9, 0.9]];
+    let box = [[0, 0.1, 0.9, 0.9]];
+    if (((_a3 = config3.face.gear) == null ? void 0 : _a3["crop"]) > 0) {
+      const crop = (_b3 = config3.face.gear) == null ? void 0 : _b3["crop"];
+      box = [[crop, crop, 1 - crop, 1 - crop]];
+    }
     t10.resize = eK.cropAndResize(image, box, [0], [model12.inputs[0].shape[2], model12.inputs[0].shape[1]]);
     const obj = { age: 0, gender: "unknown", genderScore: 0, race: [] };
-    if ((_a3 = config3.face.gear) == null ? void 0 : _a3.enabled)
+    if ((_c2 = config3.face.gear) == null ? void 0 : _c2.enabled)
       [t10.age, t10.gender, t10.race] = model12.execute(t10.resize, ["age_output", "gender_output", "race_output"]);
     const gender2 = await t10.gender.data();
     obj.gender = gender2[0] > gender2[1] ? "male" : "female";
     obj.genderScore = Math.round(100 * (gender2[0] > gender2[1] ? gender2[0] : gender2[1])) / 100;
     const race = await t10.race.data();
     for (let i = 0; i < race.length; i++) {
-      if (race[i] > (((_b3 = config3.face.gear) == null ? void 0 : _b3.minConfidence) || 0.2))
+      if (race[i] > (((_d2 = config3.face.gear) == null ? void 0 : _d2.minConfidence) || 0.2))
         obj.race.push({ score: Math.round(100 * race[i]) / 100, race: raceNames[i] });
     }
     obj.race.sort((a, b) => b.score - a.score);
@@ -39230,14 +39250,20 @@ async function predict10(image, config3, idx, count2) {
   }
   skipped9 = 0;
   return new Promise(async (resolve) => {
-    var _a3;
+    var _a3, _b3, _c3;
     if (!(model13 == null ? void 0 : model13.inputs) || !model13.inputs[0] || !model13.inputs[0].shape)
       return;
     const t10 = {};
-    t10.resize = eK.resizeBilinear(image, [model13.inputs[0].shape[2], model13.inputs[0].shape[1]], false);
+    if (((_a3 = config3.face["ssrnet"]) == null ? void 0 : _a3["crop"]) > 0) {
+      const crop = (_b3 = config3.face["ssrnet"]) == null ? void 0 : _b3["crop"];
+      const box = [[crop, crop, 1 - crop, 1 - crop]];
+      t10.resize = eK.cropAndResize(image, box, [0], [model13.inputs[0].shape[2], model13.inputs[0].shape[1]]);
+    } else {
+      t10.resize = eK.resizeBilinear(image, [model13.inputs[0].shape[2], model13.inputs[0].shape[1]], false);
+    }
     t10.enhance = ne(t10.resize, constants.tf255);
     const obj = { age: 0 };
-    if ((_a3 = config3.face["ssrnet"]) == null ? void 0 : _a3.enabled)
+    if ((_c3 = config3.face["ssrnet"]) == null ? void 0 : _c3.enabled)
       t10.age = model13.execute(t10.enhance);
     if (t10.age) {
       const data = await t10.age.data();
@@ -39280,22 +39306,34 @@ async function predict11(image, config3, idx, count2) {
   }
   skipped10 = 0;
   return new Promise(async (resolve) => {
-    var _a3;
+    var _a3, _b3, _c3;
     if (!(model14 == null ? void 0 : model14.inputs[0].shape))
       return;
     const t10 = {};
-    t10.resize = eK.resizeBilinear(image, [model14.inputs[0].shape[2], model14.inputs[0].shape[1]], false);
+    if (((_a3 = config3.face["ssrnet"]) == null ? void 0 : _a3["crop"]) > 0) {
+      const crop = (_b3 = config3.face["ssrnet"]) == null ? void 0 : _b3["crop"];
+      const box = [[crop, crop, 1 - crop, 1 - crop]];
+      t10.resize = eK.cropAndResize(image, box, [0], [model14.inputs[0].shape[2], model14.inputs[0].shape[1]]);
+    } else {
+      t10.resize = eK.resizeBilinear(image, [model14.inputs[0].shape[2], model14.inputs[0].shape[1]], false);
+    }
     t10.enhance = Ee(() => {
-      const [red, green, blue] = Oa(t10.resize, 3, 3);
-      const redNorm = ne(red, rgb2[0]);
-      const greenNorm = ne(green, rgb2[1]);
-      const blueNorm = ne(blue, rgb2[2]);
-      const grayscale = K0([redNorm, greenNorm, blueNorm]);
-      const normalize2 = ne(ke(grayscale, constants.tf05), 2);
+      var _a4, _b4;
+      let normalize2;
+      if (((_b4 = (_a4 = model14 == null ? void 0 : model14.inputs) == null ? void 0 : _a4[0].shape) == null ? void 0 : _b4[3]) === 1) {
+        const [red, green, blue] = Oa(t10.resize, 3, 3);
+        const redNorm = ne(red, rgb2[0]);
+        const greenNorm = ne(green, rgb2[1]);
+        const blueNorm = ne(blue, rgb2[2]);
+        const grayscale = K0([redNorm, greenNorm, blueNorm]);
+        normalize2 = ne(ke(grayscale, constants.tf05), 2);
+      } else {
+        normalize2 = ne(ke(t10.resize, constants.tf05), 2);
+      }
       return normalize2;
     });
     const obj = { gender: "unknown", genderScore: 0 };
-    if ((_a3 = config3.face["ssrnet"]) == null ? void 0 : _a3.enabled)
+    if ((_c3 = config3.face["ssrnet"]) == null ? void 0 : _c3.enabled)
       t10.gender = model14.execute(t10.enhance);
     const data = await t10.gender.data();
     obj.gender = data[0] > data[1] ? "female" : "male";
@@ -44224,6 +44262,8 @@ async function load17(config3) {
   inputSize8 = (model18 == null ? void 0 : model18["executor"]) && ((_a2 = model18 == null ? void 0 : model18.inputs) == null ? void 0 : _a2[0].shape) ? model18.inputs[0].shape[2] : 0;
   if (inputSize8 < 64)
     inputSize8 = 256;
+  if (O().flagRegistry.WEBGL_USE_SHAPES_UNIFORMS)
+    O().set("WEBGL_USE_SHAPES_UNIFORMS", false);
   return model18;
 }
 function parseSinglePose(res, config3, image) {
@@ -44266,12 +44306,11 @@ function parseSinglePose(res, config3, image) {
   return bodies;
 }
 function parseMultiPose(res, config3, image) {
-  config3.body.minConfidence = -1;
   const bodies = [];
   for (let id2 = 0; id2 < res[0].length; id2++) {
     const kpt4 = res[0][id2];
-    const totalScore = Math.round(100 * kpt4[51 + 4]) / 100;
-    if (totalScore > config3.body.minConfidence) {
+    const boxScore = Math.round(100 * kpt4[51 + 4]) / 100;
+    if (boxScore > config3.body.minConfidence) {
       const keypoints = [];
       for (let i = 0; i < 17; i++) {
         const score = kpt4[3 * i + 2];
@@ -44285,7 +44324,8 @@ function parseMultiPose(res, config3, image) {
           });
         }
       }
-      const newBox = calc(keypoints.map((pt) => pt.position), [image.shape[2], image.shape[1]]);
+      const boxRaw = [kpt4[51 + 1], kpt4[51 + 0], kpt4[51 + 3] - kpt4[51 + 1], kpt4[51 + 2] - kpt4[51 + 0]];
+      const boxNorm = [Math.trunc(boxRaw[0] * (image.shape[2] || 0)), Math.trunc(boxRaw[1] * (image.shape[1] || 0)), Math.trunc(boxRaw[2] * (image.shape[2] || 0)), Math.trunc(boxRaw[3] * (image.shape[1] || 0))];
       const annotations2 = {};
       for (const [name, indexes] of Object.entries(connected3)) {
         const pt = [];
@@ -44297,7 +44337,7 @@ function parseMultiPose(res, config3, image) {
         }
         annotations2[name] = pt;
       }
-      const body4 = { id: id2, score: totalScore, box: newBox.box, boxRaw: newBox.boxRaw, keypoints: [...keypoints], annotations: annotations2 };
+      const body4 = { id: id2, score: boxScore, box: boxNorm, boxRaw, keypoints: [...keypoints], annotations: annotations2 };
       bodyParts(body4);
       bodies.push(body4);
     }

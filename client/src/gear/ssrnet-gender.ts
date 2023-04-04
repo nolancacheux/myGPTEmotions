@@ -41,14 +41,25 @@ export async function predict(image: Tensor4D, config: Config, idx, count): Prom
   return new Promise(async (resolve) => {
     if (!model?.inputs[0].shape) return;
     const t: Record<string, Tensor> = {};
-    t.resize = tf.image.resizeBilinear(image, [model.inputs[0].shape[2], model.inputs[0].shape[1]], false);
+    if (config.face['ssrnet']?.['crop'] > 0) { // optional crop
+      const crop = config.face['ssrnet']?.['crop'];
+      const box = [[crop, crop, 1 - crop, 1 - crop]];
+      t.resize = tf.image.cropAndResize(image, box, [0], [model.inputs[0].shape[2], model.inputs[0].shape[1]]);
+    } else {
+      t.resize = tf.image.resizeBilinear(image, [model.inputs[0].shape[2], model.inputs[0].shape[1]], false);
+    }
     t.enhance = tf.tidy(() => {
-      const [red, green, blue] = tf.split(t.resize, 3, 3);
-      const redNorm = tf.mul(red, rgb[0]);
-      const greenNorm = tf.mul(green, rgb[1]);
-      const blueNorm = tf.mul(blue, rgb[2]);
-      const grayscale = tf.addN([redNorm, greenNorm, blueNorm]);
-      const normalize = tf.mul(tf.sub(grayscale, constants.tf05), 2); // range grayscale:-1..1
+      let normalize: Tensor;
+      if (model?.inputs?.[0].shape?.[3] === 1) {
+        const [red, green, blue] = tf.split(t.resize, 3, 3);
+        const redNorm = tf.mul(red, rgb[0]);
+        const greenNorm = tf.mul(green, rgb[1]);
+        const blueNorm = tf.mul(blue, rgb[2]);
+        const grayscale = tf.addN([redNorm, greenNorm, blueNorm]);
+        normalize = tf.mul(tf.sub(grayscale, constants.tf05), 2); // range grayscale:-1..1
+      } else {
+        normalize = tf.mul(tf.sub(t.resize, constants.tf05), 2); // range rgb:-1..1
+      }
       return normalize;
     });
     const obj: { gender: Gender, genderScore: number } = { gender: 'unknown', genderScore: 0 };
