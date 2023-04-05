@@ -136,11 +136,19 @@ const gaze = `Direction ${deg(face.rotation?.gaze.bearing)}° Force ${Math.round
 
   const canvasPrompt = document.createElement('canvas');canvasPrompt.title = `pouvez-vous me fournir trois blocs de texte séparés par des barres verticales : 1) Write me in French an original brief daily opinion and an horoscope of me at speaking at 2nd person plural (who is a ${face.gender}, whose emotions are ${emotion.join(' , ')}).2) donne moi 3 recommandations originales de musiques (not only french) 1) 2)... Pour finir Retourne à la ligne et donne moi 3 recommandations originales à faire 1) 2) 3).`.replace(/  /g, ' ');
 
-  // Update emotion bars on canvas click
-  canvas.onclick = (e) => {
-    e.preventDefault();
-    document.getElementById('informations').innerHTML = canvas.title;
-    document.getElementById('prompt').innerHTML = canvasPrompt.title;
+// Function to reset emotion bars
+function resetEmotionBars() {
+  $('.bar').attr('data-percent', '0%');
+}
+
+// Update emotion bars on canvas click
+canvas.onclick = (e) => {
+  e.preventDefault();
+  document.getElementById('informations').innerHTML = canvas.title;
+  document.getElementById('prompt').innerHTML = canvasPrompt.title;
+
+  // Reset emotion bars before updating
+  resetEmotionBars();
     // Update emotion bars
     emotion.forEach((e) => {
       const [percent, emotion] = e.split(" ");
@@ -158,7 +166,7 @@ const gaze = `Direction ${deg(face.rotation?.gaze.bearing)}° Force ${Math.round
         case "disgust":
           barSelector = ".bar:nth-of-type(5)";
           break;
-        case "anger":
+        case "angry":
             barSelector = ".bar:nth-of-type(4)";
            break;
         case "fear":
@@ -185,6 +193,7 @@ const gaze = `Direction ${deg(face.rotation?.gaze.bearing)}° Force ${Math.round
         $bar.hide();
       } else {
         setTimeout(function () {
+          $bar.hide();
           $bar.show();
           $bar.css('width', $bar.attr('data-percent'));
         }, i * 100);
@@ -452,11 +461,11 @@ const generateMsgId = () => {
   return `id-${timestamp}-${rndHexStr}`;
 };
 
-// Shows a colored message depending on the sender
+// Change chatStripe to handle single message container
 const chatStripe = (isBot, value, uniqueId) => {
   return `
-      <div class="wrapper" >
-          <div class="chat__message" id="${uniqueId}">
+      <div class="wrapper" id="${uniqueId}">
+          <div class="chat__message">
             ${value}
           </div>
         </div>
@@ -469,22 +478,33 @@ const submitHandler = async e => {
 
   const data = new FormData(form);
 
-  //user's chatstripe (false so it knows it's not a bot)
-  //chatContainer.innerHTML += chatStripe(false, data.get("prompt"));
-  //form.reset();
+  // Update existing user message container or create a new one if it doesn't exist
+  const userMessageId = "user-message";
+  const existingUserMessage = document.querySelector(`#${userMessageId}`);
+  if (existingUserMessage) {
+    existingUserMessage.querySelector(".chat__message").textContent = data.get("prompt");
+  } else {
+    chatContainer.innerHTML += chatStripe(false, data.get("prompt"), userMessageId);
+  }
+  form.reset();
 
-  //bot's chatstripe (true so it knows it's a bot and empty so it fills it with the bot's response)
-  const uniqueId = generateMsgId();
-  chatContainer.innerHTML += chatStripe(true, " ", uniqueId);
+  // Update existing bot message container or create a new one if it doesn't exist
+  const botMessageId = "bot-message";
+  const existingBotMessage = document.querySelector(`#${botMessageId}`);
+  if (existingBotMessage) {
+    existingBotMessage.querySelector(".chat__message").textContent = " ";
+  } else {
+    chatContainer.innerHTML += chatStripe(true, " ", botMessageId);
+  }
 
-  //scrolls so the message is visible
+  // Scrolls so the message is visible
   chatContainer.scrollTop = chatContainer.scrollHeight;
 
-  //shows the loading dots
-  const msgContainer = document.querySelector(`#${uniqueId}`);
+  // Shows the loading dots
+  const msgContainer = document.querySelector(`#${botMessageId} .chat__message`);
   loader2(msgContainer);
 
-  //fetch OpenAI's response
+  // Fetch OpenAI's response
   const response = await fetch("http://localhost:5000", {
     method: "POST",
     headers: {
@@ -513,6 +533,7 @@ const submitHandler = async e => {
   `;
   }
 };
+
 
 form.addEventListener("submit", submitHandler);
 form.addEventListener("keyup", e => {
