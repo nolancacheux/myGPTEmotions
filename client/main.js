@@ -58,7 +58,8 @@ class ComponentLoader extends HTMLElement {
       left: 0;
       width: 100vw;
       height: 100vh;
-      background-color: #1f003d;
+      
+  background-color: rgba(0, 0, 0, 0.7);
       z-index: 9999;
     }
     
@@ -524,13 +525,8 @@ const submitHandler = async e => {
   } else {
     const error = await response.text();
     msgContainer.innerHTML = `
-    Oops, something went wrong! 
-    
-    Here's the actual error in case you're curious, it may look ugly but don't mind it too much if you're not a developer :): 
-    
-    ${error}
-    
-  `;
+    Oups, quelque chose s'est mal passé ! Vérifiez que cela n'est pas du à votre clé API.
+    `;// Si tu veux débugger, ajoute : ${error}
   }
 };
 
