@@ -1,5 +1,7 @@
 # NolanGPTEmotions
 
+<img src="/client/photo/explication1.png" alt="Explication"/>
+
 ## Analyseur d'émotions et générateur de recommandations
 
 Ce projet est une application web qui analyse les émotions des personnes sur les photos et génère des recommandations personnalisées basées sur ces émotions. Les utilisateurs peuvent télécharger des images ou prendre des photos à partir de leur webcam. L'application utilise un modèle d'intelligence artificielle pour détecter les visages et les émotions sur ces visages, puis communique avec l'API de ChatGPT (GPT-3.5-turbo) d'OpenAI pour générer des recommandations telles que des textes d'opinion, des suggestions de musique ou d'autres activités adaptées aux émotions de l'utilisateur.
