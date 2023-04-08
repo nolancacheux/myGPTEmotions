@@ -1,6 +1,11 @@
 # NolanGPTEmotions
 
 <img src="/client/photos/explication1.JPG" alt="Explication"/>
+<img src="/client/photos/explication2.JPG" alt="Explication 2"/>
+<img src="/client/photos/explication3.JPG" alt="Explication 3"/>
+<img src="/client/photos/explication5.JPG" alt="Explication 4 "/>
+<img src="/client/photos/explication4.JPG" alt="Explication 5"/>
+<img src="/client/photos/explication6.JPG" alt="Explication 6 "/>
 
 ## Analyseur d'émotions et générateur de recommandations
 
