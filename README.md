@@ -1,5 +1,4 @@
-# NolanGPTEmotions
-
+myGPTEmotions - Nolan Cacheux
 <img src="/client/photos/explication1.JPG" alt="Explication"/>
 <img src="/client/photos/explication2.JPG" alt="Explication 2"/>
 <img src="/client/photos/explication4.JPG" alt="Explication 5"/>
